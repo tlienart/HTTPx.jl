@@ -49,22 +49,22 @@ ParseError(code::Symbol, bytes="") =
 
 """
 https://tools.ietf.org/html/rfc7230#section-3.1.1
-request-line = method SP request-target SP HTTPx-version CRLF
+request-line = method SP request-target SP HTTP-version CRLF
 """
 const request_line_regex = r"""^
     (?: \r? \n) ?                       #    ignore leading blank line
     ([!#$%&'*+\-.^_`|~[:alnum:]]+) [ ]+ # 1. method = token (RFC7230 3.2.6)
     ([^.][^ \r\n]*) [ ]+                # 2. target
-    HTTPx/(\d\.\d)                       # 3. version
+    HTTP/(\d\.\d)                       # 3. version
     \r? \n                              #    CRLF
 """x
 
 """
 https://tools.ietf.org/html/rfc7230#section-3.1.2
-status-line = HTTPx-version SP status-code SP reason-phrase CRLF
+status-line = HTTP-version SP status-code SP reason-phrase CRLF
 
 See:
-[#190](https://github.com/JuliaWeb/HTTPx.jl/issues/190#issuecomment-363314009)
+[#190](https://github.com/JuliaWeb/HTTP.jl/issues/190#issuecomment-363314009)
 """
 const status_line_regex = r"""^
     [ ]?                                # Issue #190
