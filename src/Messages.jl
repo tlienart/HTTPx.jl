@@ -1,36 +1,36 @@
 """
-The `Messages` module defines structs that represent [`HTTP.Request`](@ref)
-and [`HTTP.Response`](@ref) Messages.
+The `Messages` module defines structs that represent [`HTTPx.Request`](@ref)
+and [`HTTPx.Response`](@ref) Messages.
 
 The `Response` struct has a `request` field that points to the corresponding
 `Request`; and the `Request` struct has a `response` field.
 The `Request` struct also has a `parent` field that points to a `Response`
-in the case of HTTP Redirect.
+in the case of HTTPx Redirect.
 
 
 The Messages module defines `IO` `read` and `write` methods for Messages
 but it does not deal with URIs, creating connections, or executing requests.
 
 The `read` methods throw `EOFError` exceptions if input data is incomplete.
-and call parser functions that may throw `HTTP.ParsingError` exceptions.
+and call parser functions that may throw `HTTPx.ParsingError` exceptions.
 The `read` and `write` methods may also result in low level `IO` exceptions.
 
 
 ### Sending Messages
 
 Messages are formatted and written to an `IO` stream by
-[`Base.write(::IO,::HTTP.Messages.Message)`](@ref) and or
-[`HTTP.Messages.writeheaders`](@ref).
+[`Base.write(::IO,::HTTPx.Messages.Message)`](@ref) and or
+[`HTTPx.Messages.writeheaders`](@ref).
 
 
 ### Receiving Messages
 
 Messages are parsed from `IO` stream data by
-[`HTTP.Messages.readheaders`](@ref).
-This function calls [`HTTP.Parsers.parse_header_field`](@ref) and passes each
-header-field to [`HTTP.Messages.appendheader`](@ref).
+[`HTTPx.Messages.readheaders`](@ref).
+This function calls [`HTTPx.Parsers.parse_header_field`](@ref) and passes each
+header-field to [`HTTPx.Messages.appendheader`](@ref).
 
-`readheaders` relies on [`HTTP.IOExtras.unread!`](@ref) to push excess
+`readheaders` relies on [`HTTPx.IOExtras.unread!`](@ref) to push excess
 data back to the input stream.
 
 
@@ -41,19 +41,19 @@ Headers are represented by `Vector{Pair{String,String}}`. As compared to
 order](https://tools.ietf.org/html/rfc7230#section-3.2.2).
 
 Header values can be accessed by name using
-[`HTTP.Messages.header`](@ref) and
-[`HTTP.Messages.setheader`](@ref) (case-insensitive).
+[`HTTPx.Messages.header`](@ref) and
+[`HTTPx.Messages.setheader`](@ref) (case-insensitive).
 
-The [`HTTP.Messages.appendheader`](@ref) function handles combining
+The [`HTTPx.Messages.appendheader`](@ref) function handles combining
 multi-line values, repeated header fields and special handling of
 multiple `Set-Cookie` headers.
 
 ### Bodies
 
-The `HTTP.Message` structs represent the Message Body as `Vector{UInt8}`.
+The `HTTPx.Message` structs represent the Message Body as `Vector{UInt8}`.
 
 Streaming of request and response bodies is handled by the
-[`HTTP.StreamLayer`](@ref) and the [`HTTP.Stream`](@ref) `<: IO` stream.
+[`HTTPx.StreamLayer`](@ref) and the [`HTTPx.Stream`](@ref) `<: IO` stream.
 """
 module Messages
 
@@ -67,7 +67,7 @@ export Message, Request, Response, HeaderSizeError,
        bodylength, unknown_length,
        payload
 
-import ..HTTP
+import ..HTTPx
 
 using ..Pairs
 using ..IOExtras
@@ -81,12 +81,12 @@ const unknown_length = typemax(Int)
 
 abstract type Message end
 
-# HTTP Response
+# HTTPx Response
 
 """
     Response <: Message
 
-Represents a HTTP Response Message.
+Represents a HTTPx Response Message.
 
 - `version::VersionNumber`
    [RFC7230 2.6](https://tools.ietf.org/html/rfc7230#section-2.6)
@@ -147,12 +147,12 @@ end
 @deprecate headers(r::Response) getfield(r, :headers)
 @deprecate body(r::Response) getfield(r, :body)
 
-# HTTP Request
+# HTTPx Request
 
 """
     Request <: Message
 
-Represents a HTTP Request Message.
+Represents a HTTPx Request Message.
 
 - `method::String`
    [RFC7230 3.1.1](https://tools.ietf.org/html/rfc7230#section-3.1.1)
@@ -212,7 +212,7 @@ mkheaders(h)::Headers = Header[string(k) => string(v) for (k,v) in h]
 @deprecate headers(r::Request) getfield(r, :headers)
 @deprecate body(r::Request) getfield(r, :body)
 
-# HTTP Message state and type queries
+# HTTPx Message state and type queries
 
 """
     issafe(::Request)
@@ -293,14 +293,14 @@ bodylength(r::Request)::Int =
     ischunked(r) ? unknown_length :
                    parse(Int, header(r, "Content-Length", "0"))
 
-# HTTP header-fields
+# HTTPx header-fields
 
 Base.getindex(m::Message, k) = header(m, k)
 
 """
     Are `field-name`s `a` and `b` equal?
 
-[HTTP `field-name`s](https://tools.ietf.org/html/rfc7230#section-3.2)
+[HTTPx `field-name`s](https://tools.ietf.org/html/rfc7230#section-3.2)
 are ASCII-only and case-insensitive.
 """
 field_name_isequal(a, b) = ascii_lc_isequal(a, b)
@@ -384,7 +384,7 @@ function appendheader(m::Message, header::Header)
     return
 end
 
-# HTTP payload body
+# HTTPx payload body
 
 #Like https://github.com/JuliaIO/FileIO.jl/blob/v0.6.1/src/FileIO.jl#L19 ?
 @deprecate load(m::Message) payload(m, String)
@@ -402,23 +402,23 @@ function decode(m::Message, encoding::String)::Vector{UInt8}
     if encoding == "gzip"
         # Use https://github.com/bicycle1885/TranscodingStreams.jl ?
     end
-    @warn "Decoding of HTTP Transfer-Encoding is not implemented yet!"
+    @warn "Decoding of HTTPx Transfer-Encoding is not implemented yet!"
     return m.body
 end
 
-# Writing HTTP Messages to IO streams
+# Writing HTTPx Messages to IO streams
 
 """
     httpversion(::Message)
 
-e.g. `"HTTP/1.1"`
+e.g. `"HTTPx/1.1"`
 """
-httpversion(m::Message) = "HTTP/$(m.version.major).$(m.version.minor)"
+httpversion(m::Message) = "HTTPx/$(m.version.major).$(m.version.minor)"
 
 """
     writestartline(::IO, ::Message)
 
-e.g. `"GET /path HTTP/1.1\\r\\n"` or `"HTTP/1.1 200 OK\\r\\n"`
+e.g. `"GET /path HTTPx/1.1\\r\\n"` or `"HTTPx/1.1 200 OK\\r\\n"`
 """
 function writestartline(io::IO, r::Request)
     write(io, "$(r.method) $(r.target) $(httpversion(r))\r\n")
@@ -448,7 +448,7 @@ end
 """
     write(::IO, ::Message)
 
-Write start line, headers and body of HTTP Message.
+Write start line, headers and body of HTTPx Message.
 """
 function Base.write(io::IO, m::Message)
     writeheaders(io, m)
@@ -462,7 +462,7 @@ function Base.String(m::Message)
     String(take!(io))
 end
 
-# Reading HTTP Messages from IO streams
+# Reading HTTPx Messages from IO streams
 
 """
     readheaders(::IO, ::Message)

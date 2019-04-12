@@ -4,7 +4,7 @@ export Stream, closebody, isaborted,
        header, hasheader,
        setstatus, setheader
 
-import ..HTTP
+import ..HTTPx
 using ..Sockets
 using ..IOExtras
 using ..Messages
@@ -27,24 +27,24 @@ end
 """
     Stream(::Request, ::IO)
 
-Creates a `HTTP.Stream` that wraps an existing `IO` stream.
+Creates a `HTTPx.Stream` that wraps an existing `IO` stream.
 
  - `startwrite(::Stream)` sends the `Request` headers to the `IO` stream.
  - `write(::Stream, body)` sends the `body` (or a chunk of the body).
  - `closewrite(::Stream)` sends the final `0` chunk (if needed) and calls
    `closewrite` on the `IO` stream. When the `IO` stream is a
-   [`HTTP.ConnectionPool.Transaction`](@ref), calling `closewrite` releases
-   the [`HTTP.ConnectionPool.Connection`](@ref) back into the pool for use by the
+   [`HTTPx.ConnectionPool.Transaction`](@ref), calling `closewrite` releases
+   the [`HTTPx.ConnectionPool.Connection`](@ref) back into the pool for use by the
    next pipelined request.
 
  - `startread(::Stream)` calls `startread` on the `IO` stream then
     reads and parses the `Response` headers.  When the `IO` stream is a
-   [`HTTP.ConnectionPool.Transaction`](@ref), calling `startread` waits for other
-   pipelined responses to be read from the [`HTTP.ConnectionPool.Connection`](@ref).
+   [`HTTPx.ConnectionPool.Transaction`](@ref), calling `startread` waits for other
+   pipelined responses to be read from the [`HTTPx.ConnectionPool.Connection`](@ref).
  - `eof(::Stream)` and `readavailable(::Stream)` parse the body from the `IO`
     stream.
  - `closeread(::Stream)` reads the trailers and calls `closeread` on the `IO`
-    stream.  When the `IO` stream is a [`HTTP.ConnectionPool.Transaction`](@ref),
+    stream.  When the `IO` stream is a [`HTTPx.ConnectionPool.Transaction`](@ref),
     calling `closeread` releases the readlock and allows the next pipelined
     response to be read by another `Stream` that is waiting in `startread`.
     If a complete response has not been recieved, `closeread` throws `EOFError`.
@@ -60,7 +60,7 @@ Sockets.getsockname(http::Stream) = Sockets.getsockname(getrawstream(http))
 
 IOExtras.isopen(http::Stream) = isopen(http.stream)
 
-# Writing HTTP Messages
+# Writing HTTPx Messages
 
 messagetowrite(http::Stream{Response}) = http.message.request
 messagetowrite(http::Stream{Request}) = http.message.response
@@ -137,7 +137,7 @@ function IOExtras.closewrite(http::Stream{Request})
     end
 end
 
-# Reading HTTP Messages
+# Reading HTTPx Messages
 
 IOExtras.isreadable(http::Stream) = isreadable(http.stream)
 
@@ -240,8 +240,8 @@ Base.read(http::Stream, n::Integer) = readavailable(http, Int(n))
 function Base.read(http::Stream, ::Type{UInt8})
 
     if http.warn_not_to_read_one_byte_at_a_time
-        @warn "Reading one byte at a time from HTTP.Stream is inefficient.\n" *
-              "Use: io = BufferedInputStream(http::HTTP.Stream) instead.\n" *
+        @warn "Reading one byte at a time from HTTPx.Stream is inefficient.\n" *
+              "Use: io = BufferedInputStream(http::HTTPx.Stream) instead.\n" *
               "See: https://github.com/BioJulia/BufferedStreams.jl" stacktrace()
         http.warn_not_to_read_one_byte_at_a_time = false
     end

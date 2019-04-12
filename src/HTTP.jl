@@ -1,4 +1,4 @@
-module HTTP
+module HTTPx
 
 export startwrite, startread, closewrite, closeread
 
@@ -26,13 +26,13 @@ include("Streams.jl")                  ;using .Streams
 
 """
 
-    HTTP.request(method, url [, headers [, body]]; <keyword arguments>]) -> HTTP.Response
+    HTTPx.request(method, url [, headers [, body]]; <keyword arguments>]) -> HTTPx.Response
 
-Send a HTTP Request Message and receive a HTTP Response Message.
+Send a HTTPx Request Message and receive a HTTPx Response Message.
 
 e.g.
 ```julia
-r = HTTP.request("GET", "http://httpbin.org/ip")
+r = HTTPx.request("GET", "http://httpbin.org/ip")
 println(r.status)
 println(String(r.body))
 ```
@@ -49,7 +49,7 @@ e.g. a `Dict()`, a `Vector{Tuple}`, a `Vector{Pair}` or an iterator.
  - a readable `IO` stream or any `IO`-like type `T` for which
    `eof(T)` and `readavailable(T)` are defined.
 
-The `HTTP.Response` struct contains:
+The `HTTPx.Response` struct contains:
 
  - `status::Int16` e.g. `200`
  - `headers::Vector{Pair{String,String}}`
@@ -57,24 +57,24 @@ The `HTTP.Response` struct contains:
  - `body::Vector{UInt8}`, the Response Body bytes
     (empty if a `response_stream` was specified in the `request`).
 
-Functions `HTTP.get`, `HTTP.put`, `HTTP.post` and `HTTP.head` are defined as
-shorthand for `HTTP.request("GET", ...)`, etc.
+Functions `HTTPx.get`, `HTTPx.put`, `HTTPx.post` and `HTTPx.head` are defined as
+shorthand for `HTTPx.request("GET", ...)`, etc.
 
-`HTTP.request` and `HTTP.open` also accept optional keyword parameters.
+`HTTPx.request` and `HTTPx.open` also accept optional keyword parameters.
 
 e.g.
 ```julia
-HTTP.request("GET", "http://httpbin.org/ip"; retries=4, cookies=true)
+HTTPx.request("GET", "http://httpbin.org/ip"; retries=4, cookies=true)
 
-HTTP.get("http://s3.us-east-1.amazonaws.com/"; aws_authorization=true)
+HTTPx.get("http://s3.us-east-1.amazonaws.com/"; aws_authorization=true)
 
 conf = (readtimeout = 10,
         pipeline_limit = 4,
         retry = false,
         redirect = false)
 
-HTTP.get("http://httpbin.org/ip"; conf..)
-HTTP.put("http://httpbin.org/put", [], "Hello"; conf..)
+HTTPx.get("http://httpbin.org/ip"; conf..)
+HTTPx.put("http://httpbin.org/put", [], "Hello"; conf..)
 ```
 
 
@@ -120,7 +120,7 @@ Redirect options
 
 Status Exception options
 
- - `status_exception = true`, throw `HTTP.StatusError` for response status >= 300.
+ - `status_exception = true`, throw `HTTPx.StatusError` for response status >= 300.
 
 
 SSLContext options
@@ -154,7 +154,7 @@ Cookie options
 
  - `cookies::Union{Bool, Dict{String, String}} = false`, enable cookies, or alternatively,
         pass a `Dict{String, String}` of name-value pairs to manually pass cookies
- - `cookiejar::Dict{String, Set{Cookie}}=default_cookiejar`, 
+ - `cookiejar::Dict{String, Set{Cookie}}=default_cookiejar`,
 
 
 Canonicalization options
@@ -167,30 +167,30 @@ Canonicalization options
 
 String body:
 ```julia
-HTTP.request("POST", "http://httpbin.org/post", [], "post body data")
+HTTPx.request("POST", "http://httpbin.org/post", [], "post body data")
 ```
 
 Stream body from file:
 ```julia
 io = open("post_data.txt", "r")
-HTTP.request("POST", "http://httpbin.org/post", [], io)
+HTTPx.request("POST", "http://httpbin.org/post", [], io)
 ```
 
 Generator body:
 ```julia
 chunks = ("chunk\$i" for i in 1:1000)
-HTTP.request("POST", "http://httpbin.org/post", [], chunks)
+HTTPx.request("POST", "http://httpbin.org/post", [], chunks)
 ```
 
 Collection body:
 ```julia
 chunks = [preamble_chunk, data_chunk, checksum(data_chunk)]
-HTTP.request("POST", "http://httpbin.org/post", [], chunks)
+HTTPx.request("POST", "http://httpbin.org/post", [], chunks)
 ```
 
 `open() do io` body:
 ```julia
-HTTP.open("POST", "http://httpbin.org/post") do io
+HTTPx.open("POST", "http://httpbin.org/post") do io
     write(io, preamble_chunk)
     write(io, data_chunk)
     write(io, checksum(data_chunk))
@@ -202,14 +202,14 @@ end
 
 String body:
 ```julia
-r = HTTP.request("GET", "http://httpbin.org/get")
+r = HTTPx.request("GET", "http://httpbin.org/get")
 println(String(r.body))
 ```
 
 Stream body to file:
 ```julia
 io = open("get_data.txt", "w")
-r = HTTP.request("GET", "http://httpbin.org/get", response_stream=io)
+r = HTTPx.request("GET", "http://httpbin.org/get", response_stream=io)
 close(io)
 println(read("get_data.txt"))
 ```
@@ -221,21 +221,21 @@ io = Base.BufferStream()
     bytes = readavailable(io))
     println("GET data: \$bytes")
 end
-r = HTTP.request("GET", "http://httpbin.org/get", response_stream=io)
+r = HTTPx.request("GET", "http://httpbin.org/get", response_stream=io)
 close(io)
 ```
 
 Stream body through `open() do io`:
 ```julia
-r = HTTP.open("GET", "http://httpbin.org/stream/10") do io
+r = HTTPx.open("GET", "http://httpbin.org/stream/10") do io
    while !eof(io)
        println(String(readavailable(io)))
    end
 end
 
-using HTTP.IOExtras
+using HTTPx.IOExtras
 
-HTTP.open("GET", "https://tinyurl.com/bach-cello-suite-1-ogg") do http
+HTTPx.open("GET", "https://tinyurl.com/bach-cello-suite-1-ogg") do http
     n = 0
     r = startread(http)
     l = parse(Int, header(r, "Content-Length"))
@@ -255,7 +255,7 @@ end
 
 String bodies:
 ```julia
-r = HTTP.request("POST", "http://httpbin.org/post", [], "post body data")
+r = HTTPx.request("POST", "http://httpbin.org/post", [], "post body data")
 println(String(r.body))
 ```
 
@@ -266,7 +266,7 @@ params = Dict("user"=>"RAO...tjN", "token"=>"NzU...Wnp", "message"=>"Hello!")
 base_url = "http://api.domain.com"
 endpoint = "/1/messages.json"
 url = base_url * endpoint
-r = HTTP.request("POST", url,
+r = HTTPx.request("POST", url,
              ["Content-Type" => "application/json"],
              JSON.json(params))
 println(JSON.parse(String(r.body)))
@@ -276,14 +276,14 @@ Stream bodies from and to files:
 ```julia
 in = open("foo.png", "r")
 out = open("foo.jpg", "w")
-HTTP.request("POST", "http://convert.com/png2jpg", [], in, response_stream=out)
+HTTPx.request("POST", "http://convert.com/png2jpg", [], in, response_stream=out)
 ```
 
 Stream bodies through: `open() do io`:
 ```julia
-using HTTP.IOExtras
+using HTTPx.IOExtras
 
-HTTP.open("POST", "http://music.com/play") do io
+HTTPx.open("POST", "http://music.com/play") do io
     write(io, JSON.json([
         "auth" => "12345XXXX",
         "song_id" => 7,
@@ -298,7 +298,7 @@ end
 ```
 """
 request(method::String, url::URI, headers::Headers, body; kw...)::Response =
-    request(HTTP.stack(;kw...), method, url, headers, body; kw...)
+    request(HTTPx.stack(;kw...), method, url, headers, body; kw...)
 #FIXME consider @nospecialize for `body` ? (other places? in ConnectionPool?)
 
 
@@ -315,21 +315,21 @@ function request(method, url, h=Header[], b=nobody;
 end
 
 """
-    HTTP.open(method, url, [,headers]) do io
+    HTTPx.open(method, url, [,headers]) do io
         write(io, body)
-        [startread(io) -> HTTP.Response]
+        [startread(io) -> HTTPx.Response]
         while !eof(io)
             readavailable(io) -> AbstractVector{UInt8}
         end
-    end -> HTTP.Response
+    end -> HTTPx.Response
 
-The `HTTP.open` API allows the Request Body to be written to (and/or the
+The `HTTPx.open` API allows the Request Body to be written to (and/or the
 Response Body to be read from) an `IO` stream.
 
 
 e.g. Streaming an audio file to the `vlc` player:
 ```julia
-HTTP.open("GET", "https://tinyurl.com/bach-cello-suite-1-ogg") do http
+HTTPx.open("GET", "https://tinyurl.com/bach-cello-suite-1-ogg") do http
     open(`vlc -q --play-and-exit --intf dummy -`, "w") do vlc
         write(vlc, http)
     end
@@ -340,9 +340,9 @@ open(f::Function, method::String, url, headers=Header[]; kw...)::Response =
     request(method, url, headers, nothing; iofunction=f, kw...)
 
 """
-    HTTP.openraw(method, url, [, headers])::Tuple{TCPSocket, Response, ByteView}
+    HTTPx.openraw(method, url, [, headers])::Tuple{TCPSocket, Response, ByteView}
 
-Open a raw socket that is unmanaged by HTTP.jl. Useful for doing HTTP upgrades
+Open a raw socket that is unmanaged by HTTPx.jl. Useful for doing HTTPx upgrades
 to other protocols.  Any bytes of the body read from the socket when reading
 headers, is returned as excess bytes in the last tuple argument.
 
@@ -354,7 +354,7 @@ headers = Dict(
     "Sec-WebSocket-Key" => "dGhlIHNhbXBsZSBub25jZQ==",
     "Sec-WebSocket-Version" => "13")
 
-socket, response, excess = HTTP.openraw("GET", "ws://echo.websocket.org", headers)
+socket, response, excess = HTTPx.openraw("GET", "ws://echo.websocket.org", headers)
 
 # Write a WebSocket frame
 frame = UInt8[0x81, 0x85, 0x37, 0xfa, 0x21, 0x3d, 0x7f, 0x9f, 0x4d, 0x51, 0x58]
@@ -363,8 +363,8 @@ write(socket, frame)
 """
 function openraw(method::String, url, headers=Header[]; kw...)::Tuple{IO, Response}
     socketready = Channel{Tuple{IO, Response}}(0)
-    @async HTTP.open(method, url, headers; kw...) do http
-        HTTP.startread(http)
+    @async HTTPx.open(method, url, headers; kw...) do http
+        HTTPx.startread(http)
         socket = http.stream
         put!(socketready, (socket, http.message))
         while(isopen(socket))
@@ -375,44 +375,44 @@ function openraw(method::String, url, headers=Header[]; kw...)::Tuple{IO, Respon
 end
 
 """
-    HTTP.get(url [, headers]; <keyword arguments>) -> HTTP.Response
+    HTTPx.get(url [, headers]; <keyword arguments>) -> HTTPx.Response
 
-Shorthand for `HTTP.request("GET", ...)`. See [`HTTP.request`](@ref).
+Shorthand for `HTTPx.request("GET", ...)`. See [`HTTPx.request`](@ref).
 """
 get(a...; kw...) = request("GET", a...; kw...)
 
 """
-    HTTP.put(url, headers, body; <keyword arguments>) -> HTTP.Response
+    HTTPx.put(url, headers, body; <keyword arguments>) -> HTTPx.Response
 
-Shorthand for `HTTP.request("PUT", ...)`. See [`HTTP.request`](@ref).
+Shorthand for `HTTPx.request("PUT", ...)`. See [`HTTPx.request`](@ref).
 """
 put(u, h=[], b=""; kw...) = request("PUT", u, h, b; kw...)
 
 """
-    HTTP.post(url, headers, body; <keyword arguments>) -> HTTP.Response
+    HTTPx.post(url, headers, body; <keyword arguments>) -> HTTPx.Response
 
-Shorthand for `HTTP.request("POST", ...)`. See [`HTTP.request`](@ref).
+Shorthand for `HTTPx.request("POST", ...)`. See [`HTTPx.request`](@ref).
 """
 post(u, h=[], b=""; kw...) = request("POST", u, h, b; kw...)
 
 """
-    HTTP.patch(url, headers, body; <keyword arguments>) -> HTTP.Response
+    HTTPx.patch(url, headers, body; <keyword arguments>) -> HTTPx.Response
 
-Shorthand for `HTTP.request("PATCH", ...)`. See [`HTTP.request`](@ref).
+Shorthand for `HTTPx.request("PATCH", ...)`. See [`HTTPx.request`](@ref).
 """
 patch(u, h=[], b=""; kw...) = request("PATCH", u, h, b; kw...)
 
 """
-    HTTP.head(url; <keyword arguments>) -> HTTP.Response
+    HTTPx.head(url; <keyword arguments>) -> HTTPx.Response
 
-Shorthand for `HTTP.request("HEAD", ...)`. See [`HTTP.request`](@ref).
+Shorthand for `HTTPx.request("HEAD", ...)`. See [`HTTPx.request`](@ref).
 """
 head(u; kw...) = request("HEAD", u; kw...)
 
 """
-    HTTP.delete(url [, headers]; <keyword arguments>) -> HTTP.Response
+    HTTPx.delete(url [, headers]; <keyword arguments>) -> HTTPx.Response
 
-Shorthand for `HTTP.request("DELETE", ...)`. See [`HTTP.request`](@ref).
+Shorthand for `HTTPx.request("DELETE", ...)`. See [`HTTPx.request`](@ref).
 """
 delete(a...; kw...) = request("DELETE", a...; kw...)
 
@@ -487,8 +487,8 @@ include("StreamRequest.jl");            using .StreamRequest
 include("ContentTypeRequest.jl");       using .ContentTypeDetection
 
 """
-The `stack()` function returns the default HTTP Layer-stack type.
-This type is passed as the first parameter to the [`HTTP.request`](@ref) function.
+The `stack()` function returns the default HTTPx Layer-stack type.
+This type is passed as the first parameter to the [`HTTPx.request`](@ref) function.
 
 `stack()` accepts optional keyword arguments to enable/disable specific layers
 in the stack:
@@ -502,22 +502,22 @@ stack = MessageLayer{ConnectionPoolLayer{StreamLayer}}
 ```
 
 The figure below illustrates the full request exection stack and its
-relationship with [`HTTP.Response`](@ref), [`HTTP.Parsers`](@ref),
-[`HTTP.Stream`](@ref) and the [`HTTP.ConnectionPool`](@ref).
+relationship with [`HTTPx.Response`](@ref), [`HTTPx.Parsers`](@ref),
+[`HTTPx.Stream`](@ref) and the [`HTTPx.ConnectionPool`](@ref).
 
 ```
  ┌────────────────────────────────────────────────────────────────────────────┐
  │                                            ┌───────────────────┐           │
- │  HTTP.jl Request Execution Stack           │ HTTP.ParsingError ├ ─ ─ ─ ─ ┐ │
+ │  HTTPx.jl Request Execution Stack           │ HTTPx.ParsingError ├ ─ ─ ─ ─ ┐ │
  │                                            └───────────────────┘           │
  │                                            ┌───────────────────┐         │ │
- │                                            │ HTTP.IOError      ├ ─ ─ ─     │
+ │                                            │ HTTPx.IOError      ├ ─ ─ ─     │
  │                                            └───────────────────┘      │  │ │
  │                                            ┌───────────────────┐           │
- │                                            │ HTTP.StatusError  │─ ─   │  │ │
+ │                                            │ HTTPx.StatusError  │─ ─   │  │ │
  │                                            └───────────────────┘   │       │
  │                                            ┌───────────────────┐      │  │ │
- │     request(method, url, headers, body) -> │ HTTP.Response     │   │       │
+ │     request(method, url, headers, body) -> │ HTTPx.Response     │   │       │
  │             ──────────────────────────     └─────────▲─────────┘      │  │ │
  │                           ║                          ║             │       │
  │   ┌────────────────────────────────────────────────────────────┐      │  │ │
@@ -546,9 +546,9 @@ relationship with [`HTTP.Response`](@ref), [`HTTP.Parsers`](@ref),
 ││   │ request(StreamLayer,               ::IO,  ::Request, body) │           │
 ││   └──────────────┬───────────────────┬─────────────────────────┘         │ │
 │└──────────────────┼────────║──────────┼───────────────║─────────────────────┘
-│                   │        ║          │               ║                   │  
+│                   │        ║          │               ║                   │
 │┌──────────────────▼───────────────┐   │  ┌──────────────────────────────────┐
-││ HTTP.Request                     │   │  │ HTTP.Response                  │ │
+││ HTTPx.Request                     │   │  │ HTTPx.Response                  │ │
 ││                                  │   │  │                                  │
 ││ method::String                   ◀───┼──▶ status::Int                    │ │
 ││ target::String                   │   │  │ headers::Vector{Pair}            │
@@ -556,7 +556,7 @@ relationship with [`HTTP.Response`](@ref), [`HTTP.Parsers`](@ref),
 ││ body::Vector{UInt8}              │   │  │                                  │
 │└──────────────────▲───────────────┘   │  └───────────────▲────────────────┼─┘
 │┌──────────────────┴────────║──────────▼───────────────║──┴──────────────────┐
-││ HTTP.Stream <:IO          ║           ╔══════╗       ║                   │ │
+││ HTTPx.Stream <:IO          ║           ╔══════╗       ║                   │ │
 ││   ┌───────────────────────────┐       ║   ┌──▼─────────────────────────┐   │
 ││   │ startwrite(::Stream)      │       ║   │ startread(::Stream)        │ │ │
 ││   │ write(::Stream, body)     │       ║   │ read(::Stream) -> body     │   │
@@ -565,21 +565,21 @@ relationship with [`HTTP.Response`](@ref), [`HTTP.Parsers`](@ref),
 ││   └───────────────────────────┘       ║   └────────────────────────────┘ │ │
 │└───────────────────────────║────────┬──║──────║───────║──┬──────────────────┘
 │┌──────────────────────────────────┐ │  ║ ┌────▼───────║──▼────────────────┴─┐
-││ HTTP.Messages                    │ │  ║ │ HTTP.Parsers                     │
+││ HTTPx.Messages                    │ │  ║ │ HTTPx.Parsers                     │
 ││                                  │ │  ║ │                                  │
 ││ writestartline(::IO, ::Request)  │ │  ║ │ parse_status_line(bytes, ::Req') │
 ││ writeheaders(::IO, ::Request)    │ │  ║ │ parse_header_field(bytes, ::Req')│
 │└──────────────────────────────────┘ │  ║ └──────────────────────────────────┘
-│                            ║        │  ║                                     
+│                            ║        │  ║
 │┌───────────────────────────║────────┼──║────────────────────────────────────┐
-└▶ HTTP.ConnectionPool       ║        │  ║                                    │
+└▶ HTTPx.ConnectionPool       ║        │  ║                                    │
  │                     ┌──────────────▼────────┐ ┌───────────────────────┐    │
- │ getconnection() ->  │ HTTP.Transaction <:IO │ │ HTTP.Transaction <:IO │    │
+ │ getconnection() ->  │ HTTPx.Transaction <:IO │ │ HTTPx.Transaction <:IO │    │
  │                     └───────────────────────┘ └───────────────────────┘    │
  │                           ║    ╲│╱    ║                  ╲│╱               │
  │                           ║     │     ║                   │                │
  │                     ┌───────────▼───────────┐ ┌───────────▼───────────┐    │
- │              pool: [│ HTTP.Connection       │,│ HTTP.Connection       │...]│
+ │              pool: [│ HTTPx.Connection       │,│ HTTPx.Connection       │...]│
  │                     └───────────┬───────────┘ └───────────┬───────────┘    │
  │                           ║     │     ║                   │                │
  │                     ┌───────────▼───────────┐ ┌───────────▼───────────┐    │
@@ -590,9 +590,9 @@ relationship with [`HTTP.Response`](@ref), [`HTTP.Parsers`](@ref),
  │                           ║           ║       │ Base.TCPSocket <:IO   │    │
  │                           ║           ║       └───────────────────────┘    │
  └───────────────────────────║───────────║────────────────────────────────────┘
-                             ║           ║                                     
+                             ║           ║
  ┌───────────────────────────║───────────║──────────────┐  ┏━━━━━━━━━━━━━━━━━━┓
- │ HTTP Server               ▼                          │  ┃ data flow: ════▶ ┃
+ │ HTTPx Server               ▼                          │  ┃ data flow: ════▶ ┃
  │                        Request     Response          │  ┃ reference: ────▶ ┃
  └──────────────────────────────────────────────────────┘  ┗━━━━━━━━━━━━━━━━━━┛
 ```

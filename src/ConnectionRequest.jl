@@ -9,14 +9,14 @@ using MbedTLS: SSLContext
 import ..@debug, ..DEBUG_LEVEL
 
 """
-    request(ConnectionPoolLayer, ::URI, ::Request, body) -> HTTP.Response
+    request(ConnectionPoolLayer, ::URI, ::Request, body) -> HTTPx.Response
 
 Retrieve an `IO` connection from the [`ConnectionPool`](@ref).
 
 Close the connection if the request throws an exception.
 Otherwise leave it open so that it can be reused.
 
-`IO` related exceptions from `Base` are wrapped in `HTTP.IOError`.
+`IO` related exceptions from `Base` are wrapped in `HTTPx.IOError`.
 See [`isioerror`](@ref).
 """
 abstract type ConnectionPoolLayer{Next <: Layer} <: Layer end
@@ -83,7 +83,7 @@ end
 
 function connect_tunnel(io, target_url, req)
     target = "$(URIs.hoststring(target_url.host)):$(target_url.port)"
-    @debug 1 "📡  CONNECT HTTPS tunnel to $target"
+    @debug 1 "📡  CONNECT HTTPxS tunnel to $target"
     headers = Dict(filter(x->x.first == "Proxy-Authorization", req.headers))
     request = Request("CONNECT", target, headers)
     writeheaders(io, request)

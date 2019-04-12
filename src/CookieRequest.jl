@@ -10,7 +10,7 @@ import ..@debug, ..DEBUG_LEVEL
 const default_cookiejar = Dict{String, Set{Cookie}}()
 
 """
-    request(CookieLayer, method, ::URI, headers, body) -> HTTP.Response
+    request(CookieLayer, method, ::URI, headers, body) -> HTTPx.Response
 
 Add locally stored Cookies to the request headers.
 Store new Cookies found in the response headers.

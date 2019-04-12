@@ -9,7 +9,7 @@ using ..Pairs: getkv, setkv, rmkv
 import ..@debug, ..DEBUG_LEVEL
 
 """
-    request(AWS4AuthLayer, ::URI, ::Request, body) -> HTTP.Response
+    request(AWS4AuthLayer, ::URI, ::Request, body) -> HTTPx.Response
 
 Add a [AWS Signature Version 4](http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html)
 `Authorization` header to a `Request`.
@@ -89,7 +89,7 @@ function sign_aws4!(method::String,
     # SHA256 hash of content...
     content_hash = bytes2hex(body_sha256)
 
-    # HTTP headers...
+    # HTTPx headers...
     rmkv(headers, "Authorization")
     setkv(headers, "host", url.host)
     setkv(headers, "x-amz-date", datetime)

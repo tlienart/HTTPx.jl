@@ -8,7 +8,7 @@ const live_mode = true
 include("IODebug.jl")
 
 """
-    request(DebugLayer, ::IO, ::Request, body) -> HTTP.Response
+    request(DebugLayer, ::IO, ::Request, body) -> HTTPx.Response
 
 Wrap the `IO` stream in an `IODebug` stream and print Message data.
 """

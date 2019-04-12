@@ -9,7 +9,7 @@ using ..MessageRequest
 import ..@debug, ..DEBUG_LEVEL, ..printlncompact, ..sprintcompact
 
 """
-    request(StreamLayer, ::IO, ::Request, body) -> HTTP.Response
+    request(StreamLayer, ::IO, ::Request, body) -> HTTPx.Response
 
 Create a [`Stream`](@ref) to send a `Request` and `body` to an `IO`
 stream and read the response.

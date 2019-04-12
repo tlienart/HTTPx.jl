@@ -1,9 +1,9 @@
 """
-The `HTTP.Servers` module provides HTTP server functionality.
+The `HTTPx.Servers` module provides HTTPx server functionality.
 
-The main entry point is `HTTP.listen(f, host, port; kw...)` which takes
-a `f(::HTTP.Stream)::Nothing` function argument, a `host`, a `port` and
-optional keyword arguments.  For full details, see `?HTTP.listen`.
+The main entry point is `HTTPx.listen(f, host, port; kw...)` which takes
+a `f(::HTTPx.Stream)::Nothing` function argument, a `host`, a `port` and
+optional keyword arguments.  For full details, see `?HTTPx.listen`.
 """
 module Servers
 
@@ -86,13 +86,13 @@ function getsslcontext(tcp, sslconfig)
 end
 
 """
-    HTTP.listen([host=Sockets.localhost[, port=8081]]; kw...) do http
+    HTTPx.listen([host=Sockets.localhost[, port=8081]]; kw...) do http
         ...
     end
 
-Listen for HTTP connections and execute the `do` function for each request.
+Listen for HTTPx connections and execute the `do` function for each request.
 
-The `do` function should be of the form `f(::HTTP.Stream)::Nothing`.
+The `do` function should be of the form `f(::HTTPx.Stream)::Nothing`.
 
 Optional keyword arguments:
  - `sslconfig=nothing`, Provide an `MbedTLS.SSLConfig` object to handle ssl
@@ -116,22 +116,22 @@ Optional keyword arguments:
 
 e.g.
 ```
-    HTTP.listen("127.0.0.1", 8081) do http
-        HTTP.setheader(http, "Content-Type" => "text/html")
+    HTTPx.listen("127.0.0.1", 8081) do http
+        HTTPx.setheader(http, "Content-Type" => "text/html")
         write(http, "target uri: \$(http.message.target)<BR>")
         write(http, "request body:<BR><PRE>")
         write(http, read(http))
         write(http, "</PRE>")
     end
 
-    HTTP.listen("127.0.0.1", 8081) do http
+    HTTPx.listen("127.0.0.1", 8081) do http
         @show http.message
-        @show HTTP.header(http, "Content-Type")
+        @show HTTPx.header(http, "Content-Type")
         while !eof(http)
             println("body data: ", String(readavailable(http)))
         end
-        HTTP.setstatus(http, 404)
-        HTTP.setheader(http, "Foo-Header" => "bar")
+        HTTPx.setstatus(http, 404)
+        HTTPx.setheader(http, "Foo-Header" => "bar")
         startwrite(http)
         write(http, "response body")
         write(http, "more response body")
@@ -139,26 +139,26 @@ e.g.
 ```
 
 The `server=` option can be used to pass an already listening socket to
-`HTTP.listen`. This allows control of server shutdown.
+`HTTPx.listen`. This allows control of server shutdown.
 
 e.g.
 ```
     server = Sockets.listen(Sockets.InetAddr(parse(IPAddr, host), port))
-    @async HTTP.listen(f, host, port; server=server)
+    @async HTTPx.listen(f, host, port; server=server)
 
-    # Closeing server will stop HTTP.listen.
+    # Closeing server will stop HTTPx.listen.
     close(server)
 ```
 
-To run the following HTTP chat example, open two Julia REPL windows and paste
+To run the following HTTPx chat example, open two Julia REPL windows and paste
 the example code into both of them. Then in one window run `chat_server()` and
 in the other run `chat_client()`, then type `hello` and press return.
 Whatever you type on the client will be displayed on the server and vis-versa.
 
 ```
-using HTTP
+using HTTPx
 
-function chat(io::HTTP.Stream)
+function chat(io::HTTPx.Stream)
     @async while !eof(io)
         write(stdout, readavailable(io), "\\n")
     end
@@ -167,12 +167,12 @@ function chat(io::HTTP.Stream)
     end
 end
 
-chat_server() = HTTP.listen("127.0.0.1", 8087) do io
-    write(io, "HTTP.jl Chat Server. Welcome!")
+chat_server() = HTTPx.listen("127.0.0.1", 8087) do io
+    write(io, "HTTPx.jl Chat Server. Welcome!")
     chat(io)
 end
 
-chat_client() = HTTP.open("POST", "http://127.0.0.1:8087") do io
+chat_client() = HTTPx.open("POST", "http://127.0.0.1:8087") do io
     chat(io)
 end
 ```
@@ -276,7 +276,7 @@ end
 
 """
 Start a `check_readtimeout` task to close the `Connection` if it is inactive.
-Create a `Transaction` object for each HTTP Request received.
+Create a `Transaction` object for each HTTPx Request received.
 After `reuse_limit + 1` transactions, signal `final_transaction` to the
 transaction handler.
 """
@@ -322,7 +322,7 @@ function check_readtimeout(c, readtimeout, wait_for_timeout)
 end
 
 """
-Create a `HTTP.Stream` and parse the Request headers from a `HTTP.Transaction`
+Create a `HTTPx.Stream` and parse the Request headers from a `HTTPx.Transaction`
 (by calling `startread(::Stream`).
 If there is a parse error, send an error Response.
 Otherwise, execute stream processing function `f`.

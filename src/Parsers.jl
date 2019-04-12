@@ -1,9 +1,9 @@
 """
-The parser separates a raw HTTP Message into its component parts.
+The parser separates a raw HTTPx Message into its component parts.
 
-If the input data is invalid the Parser throws a `HTTP.ParseError`.
+If the input data is invalid the Parser throws a `HTTPx.ParseError`.
 
-The `parse_*` functions processes a single element of a HTTP Message at a time
+The `parse_*` functions processes a single element of a HTTPx Message at a time
 and return a `SubString` containing the unused portion of the input.
 
 The Parser does not interpret the Message Headers. It is beyond the scope of the
@@ -45,30 +45,30 @@ end
 ParseError(code::Symbol, bytes="") =
     ParseError(code, first(split(String(bytes), '\n')))
 
-# Regular expressions for parsing HTTP start-line and header-fields
+# Regular expressions for parsing HTTPx start-line and header-fields
 
 """
 https://tools.ietf.org/html/rfc7230#section-3.1.1
-request-line = method SP request-target SP HTTP-version CRLF
+request-line = method SP request-target SP HTTPx-version CRLF
 """
 const request_line_regex = r"""^
     (?: \r? \n) ?                       #    ignore leading blank line
     ([!#$%&'*+\-.^_`|~[:alnum:]]+) [ ]+ # 1. method = token (RFC7230 3.2.6)
     ([^.][^ \r\n]*) [ ]+                # 2. target
-    HTTP/(\d\.\d)                       # 3. version
+    HTTPx/(\d\.\d)                       # 3. version
     \r? \n                              #    CRLF
 """x
 
 """
 https://tools.ietf.org/html/rfc7230#section-3.1.2
-status-line = HTTP-version SP status-code SP reason-phrase CRLF
+status-line = HTTPx-version SP status-code SP reason-phrase CRLF
 
 See:
-[#190](https://github.com/JuliaWeb/HTTP.jl/issues/190#issuecomment-363314009)
+[#190](https://github.com/JuliaWeb/HTTPx.jl/issues/190#issuecomment-363314009)
 """
 const status_line_regex = r"""^
     [ ]?                                # Issue #190
-    HTTP/(\d\.\d) [ ]+                  # 1. version
+    HTTPx/(\d\.\d) [ ]+                  # 1. version
     (\d\d\d) .*                         # 2. status
     \r? \n                              #    CRLF
 """x
@@ -101,7 +101,7 @@ const obs_fold_header_field_regex = r"""^
 
 const empty_header_field_regex = r"^ \r? \n"x
 
-# HTTP start-line and header-field parsing
+# HTTPx start-line and header-field parsing
 
 """
 Arbitrary limit to protect against denial of service attacks.
@@ -150,7 +150,7 @@ function find_end_of_header(bytes::AbstractVector{UInt8}; allow_obs_fold=true)
 end
 
 """
-Parse HTTP request-line `bytes` and set the
+Parse HTTPx request-line `bytes` and set the
 `method`, `target` and `version` fields of `request`.
 Return a `SubString` containing the header-field lines.
 """
@@ -166,7 +166,7 @@ function parse_request_line!(bytes::AbstractString, request)::SubString{String}
 end
 
 """
-Parse HTTP response-line `bytes` and set the
+Parse HTTPx response-line `bytes` and set the
 `status` and `version` fields of `response`.
 Return a `SubString` containing the header-field lines.
 """
@@ -181,7 +181,7 @@ function parse_status_line!(bytes::AbstractString, response)::SubString{String}
 end
 
 """
-Parse HTTP header-field.
+Parse HTTPx header-field.
 Return `Pair(field-name => field-value)` and
 a `SubString` containing the remaining header-field lines.
 """
@@ -209,7 +209,7 @@ function parse_header_field(bytes::SubString{String})::Tuple{Header,SubString{St
     throw(ParseError(:INVALID_HEADER_FIELD, bytes))
 end
 
-# HTTP Chunked Transfer Coding
+# HTTPx Chunked Transfer Coding
 
 """
 Arbitrary limit to protect against denial of service attacks.
@@ -267,7 +267,7 @@ Arbitrary limit to protect against denial of service attacks.
 const chunk_size_limit = typemax(Int32)
 
 """
-Parse HTTP chunk-size.
+Parse HTTPx chunk-size.
 Return number of bytes of chunk-data.
 
     chunk-size = 1*HEXDIG

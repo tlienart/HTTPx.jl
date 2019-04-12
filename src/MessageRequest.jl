@@ -12,7 +12,7 @@ import ..Headers
 import ..Form
 
 """
-    request(MessageLayer, method, ::URI, headers, body) -> HTTP.Response
+    request(MessageLayer, method, ::URI, headers, body) -> HTTPx.Response
 
 Construct a [`Request`](@ref) object and set mandatory headers.
 """
@@ -50,7 +50,7 @@ end
 const USER_AGENT = Ref{String}()
 
 """
-Set the default User-Agent string to be used in each HTTP request.
+Set the default User-Agent string to be used in each HTTPx request.
 Can be manually overridden by passing an explicit `User-Agent` header.
 """
 function setuseragent!(x::String)

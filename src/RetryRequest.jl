@@ -1,6 +1,6 @@
 module RetryRequest
 
-import ..HTTP
+import ..HTTPx
 import ..Layer, ..request
 using ..Sockets
 using ..IOExtras
@@ -9,7 +9,7 @@ using ..Messages
 import ..@debug, ..DEBUG_LEVEL, ..sprintcompact
 
 """
-    request(RetryLayer, ::URI, ::Request, body) -> HTTP.Response
+    request(RetryLayer, ::URI, ::Request, body) -> HTTPx.Response
 
 Retry the request if it throws a recoverable exception.
 
@@ -18,7 +18,7 @@ increasing delay is introduced between attempts to avoid exacerbating network
 congestion.
 
 Methods of `isrecoverable(e)` define which exception types lead to a retry.
-e.g. `HTTP.IOError`, `Sockets.DNSError`, `Base.EOFError` and `HTTP.StatusError`
+e.g. `HTTPx.IOError`, `Sockets.DNSError`, `Base.EOFError` and `HTTPx.StatusError`
 (if status is ``5xx`).
 """
 abstract type RetryLayer{Next <: Layer} <: Layer end
@@ -47,7 +47,7 @@ end
 isrecoverable(e) = false
 isrecoverable(e::IOError) = true
 isrecoverable(e::Sockets.DNSError) = true
-isrecoverable(e::HTTP.StatusError) = e.status == 403 || # Forbidden
+isrecoverable(e::HTTPx.StatusError) = e.status == 403 || # Forbidden
                                      e.status == 408 || # Timeout
                                      e.status >= 500    # Server Error
 
@@ -64,7 +64,7 @@ function no_retry_reason(ex, req)
     buf = IOBuffer()
     show(IOContext(buf, :compact => true), req)
     print(buf, ", ",
-        ex isa HTTP.StatusError ? "HTTP $(ex.status): " :
+        ex isa HTTPx.StatusError ? "HTTPx $(ex.status): " :
         !isrecoverable(ex) ?  "$ex not recoverable, " : "",
         (req.body === body_was_streamed) ? "request streamed, " : "",
         (req.response.body === body_was_streamed) ? "response streamed, " : "",

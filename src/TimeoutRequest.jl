@@ -5,7 +5,7 @@ using ..ConnectionPool
 import ..@debug, ..DEBUG_LEVEL
 
 """
-    request(TimeoutLayer, ::IO, ::Request, body) -> HTTP.Response
+    request(TimeoutLayer, ::IO, ::Request, body) -> HTTPx.Response
 
 Close `IO` if no data has been received for `timeout` seconds.
 """
@@ -28,7 +28,7 @@ function request(::Type{TimeoutLayer{Next}}, io::IO, req, body;
 
     try
         return request(Next, io, req, body; kw...)
-    finally 
+    finally
         wait_for_timeout[] = false
     end
 end

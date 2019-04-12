@@ -3,11 +3,11 @@ module ExceptionRequest
 export StatusError
 
 import ..Layer, ..request
-import ..HTTP
+import ..HTTPx
 using ..Messages: iserror
 
 """
-    request(ExceptionLayer, ::URI, ::Request, body) -> HTTP.Response
+    request(ExceptionLayer, ::URI, ::Request, body) -> HTTPx.Response
 
 Throw a `StatusError` if the request returns an error response status.
 """
@@ -30,11 +30,11 @@ The `Response` has a `4xx`, `5xx` or unrecognised status code.
 
 Fields:
  - `status::Int16`, the response status code.
- - `response` the [`HTTP.Response`](@ref)
+ - `response` the [`HTTPx.Response`](@ref)
 """
 struct StatusError <: Exception
     status::Int16
-    response::HTTP.Response
+    response::HTTPx.Response
 end
 
 end # module ExceptionRequest

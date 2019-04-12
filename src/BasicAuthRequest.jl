@@ -8,7 +8,7 @@ using ..Pairs: getkv, setkv
 import ..@debug, ..DEBUG_LEVEL
 
 """
-    request(BasicAuthLayer, method, ::URI, headers, body) -> HTTP.Response
+    request(BasicAuthLayer, method, ::URI, headers, body) -> HTTPx.Response
 
 Add `Authorization: Basic` header using credentials from url userinfo.
 """
@@ -19,12 +19,12 @@ function request(::Type{BasicAuthLayer{Next}},
                  method::String, url::URI, headers, body; kw...) where Next
 
     userinfo = unescapeuri(url.userinfo)
-    
+
     if !isempty(userinfo) && getkv(headers, "Authorization", "") == ""
         @debug 1 "Adding Authorization: Basic header."
         setkv(headers, "Authorization", "Basic $(base64encode(userinfo))")
     end
-    
+
     return request(Next, method, url, headers, body; kw...)
 end
 

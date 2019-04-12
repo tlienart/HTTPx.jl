@@ -20,12 +20,12 @@ end
 
 
 """
-    HTTP.URI(; scheme="", host="", port="", etc...)
-    HTTP.URI(str) = parse(HTTP.URI, str::String)
+    HTTPx.URI(; scheme="", host="", port="", etc...)
+    HTTPx.URI(str) = parse(HTTPx.URI, str::String)
 
 A type representing a valid uri. Can be constructed from distinct parts using the various
-supported keyword arguments. With a raw, already-encoded uri string, use `parse(HTTP.URI, str)`
-to parse the `HTTP.URI` directly. The `HTTP.URI` constructors will automatically escape any provided
+supported keyword arguments. With a raw, already-encoded uri string, use `parse(HTTPx.URI, str)`
+to parse the `HTTPx.URI` directly. The `HTTPx.URI` constructors will automatically escape any provided
 `query` arguments, typically provided as `"key"=>"value"::Pair` or `Dict("key"=>"value")`.
 Note that multiple values for a single query key can provided like `Dict("key"=>["value1", "value2"])`.
 
@@ -39,11 +39,11 @@ component parts in the following `SubString` fields:
   * `query` e.g. `"Foo=1&Bar=2"`
   * `fragment`
 
-The `HTTP.resource(::URI)` function returns a target-resource string for the URI
+The `HTTPx.resource(::URI)` function returns a target-resource string for the URI
 [RFC7230 5.3](https://tools.ietf.org/html/rfc7230#section-5.3).
 e.g. `"\$path?\$query#\$fragment"`.
 
-The `HTTP.queryparams(::URI)` function returns a `Dict` containing the `query`.
+The `HTTPx.queryparams(::URI)` function returns a `Dict` containing the `query`.
 """
 struct URI
     uri::String
@@ -228,10 +228,10 @@ normalport(uri::URI) = uri.scheme == "http"  && uri.port == "80" ||
 
 hoststring(h) = ':' in h ? "[$h]" : h
 
-Base.show(io::IO, uri::URI) = print(io, "HTTP.URI(\"", uri, "\")")
+Base.show(io::IO, uri::URI) = print(io, "HTTPx.URI(\"", uri, "\")")
 
 showparts(io::IO, uri::URI) =
-    print(io, "HTTP.URI(\"", uri.uri, "\"\n",
+    print(io, "HTTPx.URI(\"", uri.uri, "\"\n",
               "    scheme = \"", uri.scheme, "\"",
                        uri.scheme === absent ? " (absent)" : "", ",\n",
               "    userinfo = \"", uri.userinfo, "\"",
@@ -297,7 +297,7 @@ const non_hierarchical = ["gopher", "hdl", "mailto", "news", "telnet", "wais", "
 const uses_query = ["http", "wais", "imap", "https", "shttp", "mms", "gopher", "rtsp", "rtspu", "sip", "sips", "ldap"]
 const uses_fragment = ["hdfs", "ftp", "hdl", "http", "gopher", "news", "nntp", "wais", "https", "shttp", "snews", "file", "prospero"]
 
-"checks if a `HTTP.URI` is valid"
+"checks if a `HTTPx.URI` is valid"
 function Base.isvalid(uri::URI)
     sch = uri.scheme
     isempty(sch) && throw(ArgumentError("can not validate relative URI"))

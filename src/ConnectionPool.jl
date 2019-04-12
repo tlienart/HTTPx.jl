@@ -41,7 +41,7 @@ const nolimit = typemax(Int)
 """
     Connection{T <: IO}
 
-A `TCPSocket` or `SSLContext` connection to a HTTP `host` and `port`.
+A `TCPSocket` or `SSLContext` connection to a HTTPx `host` and `port`.
 
 Fields:
 - `host::String`
@@ -82,7 +82,7 @@ mutable struct Connection{T <: IO}
 end
 
 """
-A single pipelined HTTP Request/Response transaction`.
+A single pipelined HTTPx Request/Response transaction`.
 
 Fields:
  - `c`, the shared [`Connection`](@ref) used for this `Transaction`.

@@ -2,7 +2,7 @@ module Strings
 
 export escapehtml, tocameldash, iso8859_1_to_utf8
 
-using ..IOExtras 
+using ..IOExtras
 import ..replace
 
 """

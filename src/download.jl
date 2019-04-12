@@ -20,7 +20,7 @@ function try_get_filename_from_headers(resp)
     content_disp = header(resp, "Content-Disposition")
     if content_disp != ""
         # extract out of Content-Disposition line
-        # rough version of what is needed in https://github.com/JuliaWeb/HTTP.jl/issues/179
+        # rough version of what is needed in https://github.com/JuliaWeb/HTTPxx.jl/issues/179
         filename_part = match(r"filename\s*=\s*(.*)", content_disp)
         if filename_part != nothing
             filename = filename_part[1]
@@ -82,12 +82,12 @@ If the `local_path`:
  - otherwise the local path is uses as the filename to save to.
 
 When saving into a directory, the filename is determined (where possible),
-from the rules of the HTTP.
+from the rules of the HTTPxx.
 
  - `update_period` controls how often (in seconds) to report the progress.
     - set to `Inf` to disable reporting
- - `headers` specifies headers to be used for the HTTP GET request
- - any additional keyword args (`kw...`) are passed on to the HTTP request.
+ - `headers` specifies headers to be used for the HTTPxx GET request
+ - any additional keyword args (`kw...`) are passed on to the HTTPxx request.
 """
 function download(url::AbstractString, local_path=nothing, headers=Header[]; update_period=1, kw...)
     format_progress(x) = round(x, digits=4)
@@ -98,16 +98,16 @@ function download(url::AbstractString, local_path=nothing, headers=Header[]; upd
 
     @debug 1 "downloading $url"
     local file
-    HTTP.open("GET", url, headers; kw...) do stream
+    HTTPxx.open("GET", url, headers; kw...) do stream
         resp = startread(stream)
         eof(stream) && return  # don't do anything for streams we can't read (yet)
-        
+
         file = determine_file(local_path, resp)
         total_bytes = parse(Float64, header(resp, "Content-Length", "NaN"))
         downloaded_bytes = 0
         start_time = now()
         prev_time = now()
-        
+
         function report_callback()
             prev_time = now()
             taken_time = (prev_time - start_time).value / 1000 # in seconds
@@ -115,7 +115,7 @@ function download(url::AbstractString, local_path=nothing, headers=Header[]; upd
             remaining_bytes = total_bytes - downloaded_bytes
             remaining_time = remaining_bytes / average_speed
             completion_progress = downloaded_bytes / total_bytes
-        
+
             @info("Downloading",
                   source=url,
                   dest = file,
@@ -138,8 +138,7 @@ function download(url::AbstractString, local_path=nothing, headers=Header[]; upd
             end
         end
         report_callback()
-        
+
     end
     file
 end
-

@@ -45,8 +45,8 @@ import ..IPAddr
     Cookie(; kwargs...)
     Cookie(name, value; kwargs...)
 
-A Cookie represents an HTTP cookie as sent in the Set-Cookie header of an
-HTTP response or the Cookie header of an HTTP request. Supported fields
+A Cookie represents an HTTPx cookie as sent in the Set-Cookie header of an
+HTTPx response or the Cookie header of an HTTPx request. Supported fields
 (which can be set using keyword arguments) include:
 
   * `name`: name of the cookie

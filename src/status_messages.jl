@@ -1,7 +1,7 @@
 """
     statustext(::Int) -> String
 
-`String` representation of a HTTP status code. e.g. `200 => "OK"`.
+`String` representation of a HTTPx status code. e.g. `200 => "OK"`.
 """
 statustext(status) = Base.get(STATUS_MESSAGES, status, "Unknown Code")
 
@@ -56,14 +56,14 @@ const STATUS_MESSAGES = (()->begin
     v[444] = "nginx error: No Response"
     v[495] = "nginx error: SSL Certificate Error"
     v[496] = "nginx error: SSL Certificate Required"
-    v[497] = "nginx error: HTTP -> HTTPS"
+    v[497] = "nginx error: HTTPx -> HTTPxS"
     v[499] = "nginx error or Antivirus intercepted request or ArcGIS error"
     v[500] = "Internal Server Error"
     v[501] = "Not Implemented"
     v[502] = "Bad Gateway"
     v[503] = "Service Unavailable"
     v[504] = "Gateway Time-out"
-    v[505] = "HTTP Version Not Supported"
+    v[505] = "HTTPx Version Not Supported"
     v[506] = "Variant Also Negotiates"             # RFC 2295
     v[507] = "Insufficient Storage"                # RFC 4918
     v[509] = "Bandwidth Limit Exceeded"

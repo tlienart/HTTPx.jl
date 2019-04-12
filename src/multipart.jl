@@ -6,7 +6,7 @@ A type representing a request body using the multipart/form-data encoding.
 The key-value pairs in the Dict argument will constitute the name and value of each multipart boundary chunk.
 Files and other large data arguments can be provided as values as IO arguments: either an `IOStream` such as returned via `open(file)`,
 an `IOBuffer` for in-memory data. For complete control over a multipart chunk's details, an
-`HTTP.Multipart` type is provided to support setting the `Content-Type`, `filename`, and `Content-Transfer-Encoding` if desired. See `?HTTP.Multipart` for more details.
+`HTTPx.Multipart` type is provided to support setting the `Content-Type`, `filename`, and `Content-Transfer-Encoding` if desired. See `?HTTPx.Multipart` for more details.
 """
 mutable struct Form <: IO
     data::Vector{IO}
@@ -81,7 +81,7 @@ end
 
 function writemultipartheader(io::IOBuffer, i::IOStream)
     write(io, "; filename=\"$(i.name[7:end-1])\"\r\n")
-    write(io, "Content-Type: $(HTTP.sniff(i))\r\n\r\n")
+    write(io, "Content-Type: $(HTTPx.sniff(i))\r\n\r\n")
     return
     end
     function writemultipartheader(io::IOBuffer, i::IO)
@@ -90,13 +90,13 @@ function writemultipartheader(io::IOBuffer, i::IOStream)
 end
 
 """
-Multipart(filename::String, data::IO, content_type=HTTP.sniff(data), content_transfer_encoding="")
+Multipart(filename::String, data::IO, content_type=HTTPx.sniff(data), content_transfer_encoding="")
 
 A type to represent a single multipart upload chunk for a file. This type would be used as the value in a
-key-value pair of a Dict passed to an http request, like `HTTP.post(url; body=Dict("key"=>HTTP.Multipart("MyFile.txt", open("MyFile.txt"))))`.
+key-value pair of a Dict passed to an http request, like `HTTPx.post(url; body=Dict("key"=>HTTPx.Multipart("MyFile.txt", open("MyFile.txt"))))`.
 The `data` argument must be an `IO` type such as `IOStream`, or `IOBuffer`.
 The `content_type` and `content_transfer_encoding` arguments allow the manual setting of these multipart headers. `Content-Type` will default to the result
-of the `HTTP.sniff(data)` mimetype detection algorithm, whereas `Content-Transfer-Encoding` will be left out if not specified.
+of the `HTTPx.sniff(data)` mimetype detection algorithm, whereas `Content-Transfer-Encoding` will be left out if not specified.
 """
 mutable struct Multipart{T <: IO} <: IO
     filename::String
@@ -105,7 +105,7 @@ mutable struct Multipart{T <: IO} <: IO
     contenttransferencoding::String
 end
 Multipart(f::String, data::T, ct="", cte="") where {T} = Multipart(f, data, ct, cte)
-Base.show(io::IO, m::Multipart{T}) where {T} = print(io, "HTTP.Multipart(filename=\"$(m.filename)\", data=::$T, contenttype=\"$(m.contenttype)\", contenttransferencoding=\"$(m.contenttransferencoding)\")")
+Base.show(io::IO, m::Multipart{T}) where {T} = print(io, "HTTPx.Multipart(filename=\"$(m.filename)\", data=::$T, contenttype=\"$(m.contenttype)\", contenttransferencoding=\"$(m.contenttransferencoding)\")")
 
 Base.bytesavailable(m::Multipart{T}) where {T} = isa(m.data, IOStream) ? filesize(m.data) - position(m.data) : bytesavailable(m.data)
 Base.eof(m::Multipart{T}) where {T} = eof(m.data)
@@ -116,7 +116,7 @@ Base.reset(m::Multipart{T}) where {T} = reset(m.data)
 
 function writemultipartheader(io::IOBuffer, i::Multipart)
     write(io, "; filename=\"$(i.filename)\"\r\n")
-    contenttype = i.contenttype == "" ? HTTP.sniff(i.data) : i.contenttype
+    contenttype = i.contenttype == "" ? HTTPx.sniff(i.data) : i.contenttype
     write(io, "Content-Type: $(contenttype)\r\n")
     write(io, i.contenttransferencoding == "" ? "\r\n" : "Content-Transfer-Encoding: $(i.contenttransferencoding)\r\n\r\n")
     return
