@@ -68,7 +68,7 @@ See:
 """
 const status_line_regex = r"""^
     [ ]?                                # Issue #190
-    HTTPx/(\d\.\d) [ ]+                  # 1. version
+    HTTP/(\d\.\d) [ ]+                  # 1. version
     (\d\d\d) .*                         # 2. status
     \r? \n                              #    CRLF
 """x
