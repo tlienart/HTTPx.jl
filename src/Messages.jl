@@ -413,7 +413,7 @@ end
 
 e.g. `"HTTPx/1.1"`
 """
-httpversion(m::Message) = "HTTPx/$(m.version.major).$(m.version.minor)"
+httpversion(m::Message) = "HTTP/$(m.version.major).$(m.version.minor)"
 
 """
     writestartline(::IO, ::Message)
