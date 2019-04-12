@@ -411,14 +411,14 @@ end
 """
     httpversion(::Message)
 
-e.g. `"HTTP/1.1"`
+e.g. `"HTTPx/1.1"`
 """
-httpversion(m::Message) = "HTTP/$(m.version.major).$(m.version.minor)"
+httpversion(m::Message) = "HTTPx/$(m.version.major).$(m.version.minor)"
 
 """
     writestartline(::IO, ::Message)
 
-e.g. `"GET /path HTTP/1.1\\r\\n"` or `"HTTP/1.1 200 OK\\r\\n"`
+e.g. `"GET /path HTTPx/1.1\\r\\n"` or `"HTTPx/1.1 200 OK\\r\\n"`
 """
 function writestartline(io::IO, r::Request)
     write(io, "$(r.method) $(r.target) $(httpversion(r))\r\n")
